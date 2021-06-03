@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.xml.bind.JAXBException;
+import java.io.IOException;
 
 @Slf4j
 @Component
@@ -52,7 +53,7 @@ public class MessageSubscriber {
 
                     try {
                         teleTypeService.processMessage(message.getData().toStringUtf8());
-                    } catch (JAXBException e) {
+                    } catch (JAXBException | IOException e) {
                         log.error("Exception occurred : {}", e.getMessage());
                         e.printStackTrace();
                     }

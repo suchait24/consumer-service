@@ -47,10 +47,3 @@ spring.profiles: prod
 
 ---
 spring.profiles: emulator
-
-spring:
-  jpa:
-    properties:
-      hibernate:
-        jdbc:
-          batch_size: 20
