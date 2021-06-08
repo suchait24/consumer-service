@@ -1,5 +1,6 @@
 package com.infogain.gcp.poc.consumer.component;
 
+import com.google.cloud.spanner.DatabaseClient;
 import com.infogain.gcp.poc.consumer.entity.TeleTypeEntity;
 import io.r2dbc.spi.Connection;
 import io.r2dbc.spi.Statement;
@@ -10,7 +11,6 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Component
@@ -24,7 +24,9 @@ public class TeletypeMessageStore {
 
         Connection connection = spannerOps.getConnection();
 
-        teleTypeEntityList.forEach(record -> process(connection, record));
+        processAll(teleTypeEntityList, connection);
+
+        //teleTypeEntityList.forEach(record -> process(connection, record));
 
         /*
         List<Statement> statementList = teleTypeEntityList.stream()
@@ -53,6 +55,31 @@ public class TeletypeMessageStore {
 
         return statement;
     }
+
+    private void processAll(List<TeleTypeEntity> teleTypeEntityList, Connection connection) {
+
+            Statement statement = connection.createStatement("INSERT INTO TAS (TAS_ID, BATCH_ID, CARRIER_CODE, CREATED_TIMESTAMP, HOST_LOCATOR, MESSAGE_CORRELATION_ID, PAYLOAD, SEQUENCE_NUMBER) VALUES(@tasId, @batchId ,@carrierCode, @createdTimestamp, @hostLocator, @messageCorrelationId, @payload, @sequenceNumber)")
+                    .returnGeneratedValues("id");
+
+            for (TeleTypeEntity teleTypeEntity : teleTypeEntityList) {
+                statement.bind("tasId", teleTypeEntity.getTasId())
+                        .bind("batchId", teleTypeEntity.getBatchId())
+                        .bind("carrierCode", teleTypeEntity.getCarrierCode())
+                        .bind("createdTimestamp", teleTypeEntity.getCreatedTimestamp())
+                        .bind("hostLocator", teleTypeEntity.getHostLocator())
+                        .bind("messageCorrelationId", teleTypeEntity.getMessageCorrelationId())
+                        .bind("payload", teleTypeEntity.getPayload())
+                        .bind("sequenceNumber", teleTypeEntity.getSequenceNumber())
+                        .add();
+            }
+
+        Flux.concat(connection.beginTransaction(),
+                Flux.from(statement.execute()).flatMapSequential(r -> Mono.from(r.getRowsUpdated())).then(),
+                connection.commitTransaction()
+        ).doOnComplete(() -> log.info("Insert books transaction committed."));
+                //.blockLast();
+    }
+
 
     private void process(Connection connection, TeleTypeEntity teleTypeEntity) {
 
