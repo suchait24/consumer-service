@@ -27,11 +27,11 @@ public class TeleTypeEntity {
     @Column("CARRIER_CODE")
     private String carrierCode;
 
-    @Column("CREATED_TIMESTAMP")
-    private Timestamp createdTimestamp;
+    //@Column("CREATED_TIMESTAMP")
+    //private Timestamp createdTimestamp;
 
-    @Column("UPDATED_TIMESTAMP")
-    private Timestamp updatedTimestamp;
+    //@Column("UPDATED_TIMESTAMP")
+    //private Timestamp updatedTimestamp;
 
     @Column("SEQUENCE_NUMBER")
     private Long sequenceNumber;

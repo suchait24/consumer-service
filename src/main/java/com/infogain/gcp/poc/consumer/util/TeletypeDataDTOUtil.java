@@ -37,7 +37,7 @@ public class TeletypeDataDTOUtil {
         teletypeDataDTO.setSequenceNumber(teleTypeEntity.getSequenceNumber());
         teletypeDataDTO.setTasId(teleTypeEntity.getTasId());
         teletypeDataDTO.setPayload(teleTypeEntity.getPayload());
-        teletypeDataDTO.setCreatedTimestamp(teleTypeEntity.getCreatedTimestamp().toString());
+       // teletypeDataDTO.setCreatedTimestamp(teleTypeEntity.getCreatedTimestamp().toString());
         //teletypeDataDTO.setUpdatedTimestamp(teleTypeEntity.getUpdatedTimestamp().toString());
 
        return teletypeDataDTO.toString();

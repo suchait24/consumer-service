@@ -50,7 +50,7 @@ public class TeleTypeUtil {
                 .carrierCode(teletypeEventDTO.getCarrierCode())
                 .messageCorrelationId(String.valueOf(teletypeEventDTO.getMessageCorelationId()))
                 .sequenceNumber(Long.valueOf(sequenceNumber))
-                .createdTimestamp(Timestamp.now())
+                //.createdTimestamp(Timestamp.now())
                 .batchId(batchId)
                 .payload(message)
                 .build();

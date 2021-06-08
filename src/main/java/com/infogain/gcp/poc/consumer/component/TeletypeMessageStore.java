@@ -5,6 +5,7 @@ import com.infogain.gcp.poc.consumer.repository.TASReactiveRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import reactor.core.publisher.Flux;
 
 import java.util.List;
 
@@ -18,9 +19,9 @@ public class TeletypeMessageStore {
 
     public void saveMessagesList(List<TeleTypeEntity> teleTypeEntityList) {
         log.info("Saving all messages");
-        tasReactiveRepository.saveAll(teleTypeEntityList);
-        //tasRepository.saveAll(teleTypeEntityList);
-        log.info("All messages saved in database.");
+         Flux<TeleTypeEntity> teleTypeEntityFlux = tasReactiveRepository.saveAll(teleTypeEntityList);
+
+         teleTypeEntityFlux.doOnComplete(() -> log.info("all messages saved")).blockLast();
 
     }
 }
