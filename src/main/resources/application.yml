@@ -61,3 +61,8 @@ spring:
       hibernate:
         jdbc:
           batch_size: 20
+
+  data:
+    r2dbc:
+      repositories:
+        enabled: true

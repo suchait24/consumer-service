@@ -2,45 +2,43 @@ package com.infogain.gcp.poc.consumer.entity;
 
 import com.google.cloud.Timestamp;
 import lombok.*;
-import org.springframework.cloud.gcp.data.spanner.core.mapping.Column;
-import org.springframework.cloud.gcp.data.spanner.core.mapping.PrimaryKey;
-import org.springframework.cloud.gcp.data.spanner.core.mapping.Table;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.relational.core.mapping.Column;
+import org.springframework.data.relational.core.mapping.Table;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
 @Builder
-@Table(name = "TAS")
+@Table("TAS")
 public class TeleTypeEntity {
 
-    @PrimaryKey
-    @Column(name = "TAS_ID")
+    @Column("TAS_ID")
     @Id
     private String tasId;
 
-    @Column(name = "HOST_LOCATOR")
+    @Column("HOST_LOCATOR")
     private String hostLocator;
 
-    @Column(name = "MESSAGE_CORRELATION_ID")
+    @Column("MESSAGE_CORRELATION_ID")
     private String messageCorrelationId;
 
-    @Column(name = "CARRIER_CODE")
+    @Column("CARRIER_CODE")
     private String carrierCode;
 
-    @Column(name = "CREATED_TIMESTAMP")
+    @Column("CREATED_TIMESTAMP")
     private Timestamp createdTimestamp;
 
-    @Column(name = "UPDATED_TIMESTAMP")
+    @Column("UPDATED_TIMESTAMP")
     private Timestamp updatedTimestamp;
 
-    @Column(name = "SEQUENCE_NUMBER")
+    @Column("SEQUENCE_NUMBER")
     private Long sequenceNumber;
 
-    @Column(name = "PAYLOAD")
+    @Column("PAYLOAD")
     private String payload;
 
-    @Column(name = "BATCH_ID")
+    @Column("BATCH_ID")
     private Integer batchId;
 }

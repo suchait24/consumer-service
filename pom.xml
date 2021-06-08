@@ -37,6 +37,12 @@
 		</dependency>
 
 		<dependency>
+			<groupId>com.google.cloud</groupId>
+			<artifactId>cloud-spanner-spring-data-r2dbc</artifactId>
+			<version>0.6.0-SNAPSHOT</version>
+		</dependency>
+
+		<!--<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-rest</artifactId>
 		</dependency>
@@ -45,7 +51,7 @@
 			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-gcp-starter-data-spanner</artifactId>
 			<version>1.2.7.RELEASE</version>
-		</dependency>
+		</dependency> -->
 
 		<dependency>
 			<groupId>org.projectlombok</groupId>
@@ -122,6 +128,13 @@
 
 	<dependencyManagement>
 		<dependencies>
+
+				<dependency>
+					<groupId>com.google.cloud</groupId>
+					<artifactId>cloud-spanner-r2dbc</artifactId>
+					<version>0.6.0-SNAPSHOT</version>
+				</dependency>
+
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-gcp-dependencies</artifactId>
