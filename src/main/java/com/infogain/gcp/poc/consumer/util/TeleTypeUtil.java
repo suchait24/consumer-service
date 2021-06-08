@@ -11,6 +11,7 @@ import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Slf4j
@@ -50,7 +51,7 @@ public class TeleTypeUtil {
                 .carrierCode(teletypeEventDTO.getCarrierCode())
                 .messageCorrelationId(String.valueOf(teletypeEventDTO.getMessageCorelationId()))
                 .sequenceNumber(Long.valueOf(sequenceNumber))
-                .createdTimestamp(Timestamp.now())
+                .createdTimestamp(LocalDateTime.now())
                 .batchId(batchId)
                 .payload(message)
                 .build();
