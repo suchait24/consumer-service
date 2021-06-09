@@ -4,6 +4,7 @@ import com.google.cloud.Timestamp;
 import com.infogain.gcp.poc.consumer.dto.TeletypeEventDTO;
 import com.infogain.gcp.poc.consumer.entity.TeleTypeEntity;
 import lombok.extern.slf4j.Slf4j;
+import reactor.core.publisher.Mono;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -29,7 +30,7 @@ public class TeleTypeUtil {
         return teletypeEventDTO;
     }
 
-    public static String marshall(TeletypeEventDTO teletypeEventDTO) throws JAXBException {
+    public static Mono<String> marshall(TeletypeEventDTO teletypeEventDTO) throws JAXBException {
 
         JAXBContext jaxbContext = JAXBContext.newInstance(TeletypeEventDTO.class);
         Marshaller marshaller = jaxbContext.createMarshaller();
@@ -40,12 +41,12 @@ public class TeleTypeUtil {
         String result = stringWriter.toString();
         log.info("Teletype XML generated : {}", result);
 
-        return result;
+        return Mono.just(result);
     }
 
-    public static TeleTypeEntity convert(TeletypeEventDTO teletypeEventDTO, String message, Integer sequenceNumber, Integer batchId) {
+    public static Mono<TeleTypeEntity> convert(TeletypeEventDTO teletypeEventDTO, String message, Integer sequenceNumber, Integer batchId) {
 
-        return TeleTypeEntity.builder()
+        return Mono.just(TeleTypeEntity.builder()
                 .tasId(UUID.randomUUID().toString())
                 .hostLocator(teletypeEventDTO.getHostRecordLocator())
                 .carrierCode(teletypeEventDTO.getCarrierCode())
@@ -54,6 +55,6 @@ public class TeleTypeUtil {
                 .createdTimestamp(LocalDateTime.now())
                 .batchId(batchId)
                 .payload(message)
-                .build();
+                .build());
     }
 }

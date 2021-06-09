@@ -3,7 +3,9 @@ package com.infogain.gcp.poc.consumer.util;
 import com.google.cloud.Timestamp;
 import com.infogain.gcp.poc.consumer.dto.BatchRecord;
 import com.infogain.gcp.poc.consumer.dto.TeletypeEventDTO;
+import reactor.core.publisher.Mono;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Random;
 
@@ -11,7 +13,7 @@ public class BatchRecordUtil {
 
     private static Integer BATCH_MESSAGE_ID = 1;
 
-    public static BatchRecord createBatchRecord(List<TeletypeEventDTO> teletypeEventDTOList, Timestamp batchReceivedTime) {
+    public static Mono<BatchRecord> createBatchRecord(List<TeletypeEventDTO> teletypeEventDTOList, LocalDateTime batchReceivedTime) {
 
         Random random = new Random();
 
@@ -21,7 +23,7 @@ public class BatchRecordUtil {
         batchRecord.setBatchMessageId(BATCH_MESSAGE_ID++);
         batchRecord.setBatchReceivedTime(batchReceivedTime);
 
-        return batchRecord;
+        return Mono.just(batchRecord);
     }
 
 }

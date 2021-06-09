@@ -3,7 +3,6 @@ package com.infogain.gcp.poc.consumer.service;
 import com.google.cloud.Timestamp;
 import com.infogain.gcp.poc.consumer.component.BatchStore;
 import com.infogain.gcp.poc.consumer.component.TeletypeMessageStore;
-import com.infogain.gcp.poc.consumer.component.TeletypePublisher;
 import com.infogain.gcp.poc.consumer.dto.BatchRecord;
 import com.infogain.gcp.poc.consumer.dto.TeletypeEventDTO;
 import com.infogain.gcp.poc.consumer.entity.BatchEventEntity;
@@ -15,11 +14,14 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.gcp.pubsub.support.converter.ConvertedAcknowledgeablePubsubMessage;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import javax.xml.bind.JAXBException;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
@@ -34,20 +36,24 @@ public class SubscriptionProcessingService {
     private final TeletypeMessageStore teletypeMessageStore;
     private final BatchStore batchStore;
 
-    public void processMessages(List<ConvertedAcknowledgeablePubsubMessage<TeletypeEventDTO>> msgs, Timestamp batchReceivedTime) throws InterruptedException, ExecutionException, IOException, JAXBException {
+    public Mono<Void> processMessages(List<ConvertedAcknowledgeablePubsubMessage<TeletypeEventDTO>> msgs, LocalDateTime batchReceivedTime) throws InterruptedException, ExecutionException, IOException, JAXBException {
 
         if (!msgs.isEmpty()) {
+
             List<TeletypeEventDTO> teletypeEventDTOList = msgs.stream().map(msg -> msg.getPayload()).collect(Collectors.toList());
-            BatchRecord batchRecord = BatchRecordUtil.createBatchRecord(teletypeEventDTOList, batchReceivedTime);
-            List<TeleTypeEntity> teleTypeEntityList = processSubscriptionMessagesList(batchRecord);
+            Mono<BatchRecord> batchRecord = BatchRecordUtil.createBatchRecord(teletypeEventDTOList, batchReceivedTime);
+
+            batchRecord.subscribe(batchRecord1 -> processSubscriptionMessagesList(batchRecord1));
 
             //send acknowledge for all processed messages
             msgs.forEach(msg -> msg.ack());
 
         }
+
+        return Mono.empty();
     }
 
-    private List<TeleTypeEntity> processSubscriptionMessagesList(BatchRecord batchRecord) {
+    private void processSubscriptionMessagesList(BatchRecord batchRecord) {
 
         Instant start = Instant.now();
 
@@ -62,26 +68,26 @@ public class SubscriptionProcessingService {
                 .map(record -> wrapTeletypeConversionException(record, DEFAULT_SEQUENCE_NUMBER++, batchRecord.getBatchMessageId()))
                 .collect(Collectors.toList());
 
+        log.info("before calling save method - saveMessagesList()");
         teletypeMessageStore.saveMessagesList(teleTypeEntityList);
+        Flux<Object> dbFlux = teletypeMessageStore.saveMessagesList(teleTypeEntityList);
+        dbFlux.subscribe(System.out::println);
 
         log.info("Processing stopped, all records processed  : {}", teletypeEventDTOList.size());
-
-        log.info("Logging batch to database now.");
-        BatchEventEntity batchEventEntity = BatchEventEntityUtil.createBatchEventEntity(teleTypeEntityList, batchRecord, SUBSCRIBER_ID);
-        log.info("Batch entity generated : {}", batchEventEntity);
-
-        batchStore.saveBatchEventEntity(batchEventEntity);
 
         Instant end = Instant.now();
         log.info("total time taken to process {} records is {} ms", teletypeEventDTOList.size(), Duration.between(start, end).toMillis());
 
-        return teleTypeEntityList;
     }
 
     private TeleTypeEntity wrapTeletypeConversionException(TeletypeEventDTO teletypeEventDTO, Integer sequenceNumber, Integer batchId) {
 
         try {
-            return TeleTypeUtil.convert(teletypeEventDTO, TeleTypeUtil.marshall(teletypeEventDTO), sequenceNumber, batchId);
+            Mono<String> payloadMsgMono = TeleTypeUtil.marshall(teletypeEventDTO);
+
+            Mono<TeleTypeEntity> teleTypeEntityMono = TeleTypeUtil.convert(teletypeEventDTO, payloadMsgMono.block(), sequenceNumber, batchId);
+            return teleTypeEntityMono.block();
+
         } catch (JAXBException e) {
             log.error("error occurred while converting : {}", e.getMessage());
         }

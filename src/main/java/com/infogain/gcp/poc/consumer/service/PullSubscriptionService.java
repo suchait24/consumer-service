@@ -9,9 +9,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.gcp.pubsub.core.subscriber.PubSubSubscriberTemplate;
 import org.springframework.cloud.gcp.pubsub.support.converter.ConvertedAcknowledgeablePubsubMessage;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Mono;
 
 import javax.xml.bind.JAXBException;
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
@@ -30,25 +32,15 @@ public class PullSubscriptionService {
     public void pullMessage(PubSubSubscriberTemplate subscriberTemplate) throws InterruptedException, ExecutionException, JAXBException, IOException {
 
         List<ConvertedAcknowledgeablePubsubMessage<TeletypeEventDTO>> msgs = subscriberTemplate
-                .pullAndConvert(ProjectSubscriptionName.of(projectId, subscriptionId).toString(), 100, true, TeletypeEventDTO.class);
+                .pullAndConvert(ProjectSubscriptionName.of(projectId, subscriptionId).toString(), 500, true, TeletypeEventDTO.class);
 
-        Timestamp batchReceivedTime = Timestamp.now();
+        LocalDateTime batchReceivedTime = LocalDateTime.now();
 
         //acknowledge only when batch is successfully processed.
-        subscriptionProcessingService.processMessages(msgs, batchReceivedTime);
 
-        /*
-        msgs.forEach(msg -> {
-            log.info("message received : {}", msg.getPayload().toString());
-            msg.ack();
-        });
+        Mono.from( subscriptionProcessingService.processMessages(msgs, batchReceivedTime))
+                .subscribe();
 
-        if (!msgs.isEmpty()) {
-            List<TeletypeEventDTO> teletypeEventDTOList = msgs.stream().map(msg -> msg.getPayload()).collect(Collectors.toList());
-            BatchRecord batchRecord = BatchRecordUtil.createBatchRecord(teletypeEventDTOList, batchReceivedTime);
-            subscriptionProcessingService.processSubscriptionMessagesList(batchRecord);
-        }
-         */
     }
 
 }

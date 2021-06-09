@@ -3,6 +3,8 @@ package com.infogain.gcp.poc.consumer.entity;
 import com.google.cloud.Timestamp;
 import lombok.*;
 
+import java.time.LocalDateTime;
+
 
 @Data
 @NoArgsConstructor
@@ -14,6 +16,6 @@ public class BatchEventEntity {
     private String batchEventLogId;
     private String subscriberId;
     private Integer batchMessageId;
-    private Timestamp batchReceivedTime;
+    private LocalDateTime batchReceivedTime;
     private Integer totalMessageBatchCount;
 }

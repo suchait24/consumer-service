@@ -17,7 +17,7 @@ import static io.r2dbc.spi.ConnectionFactoryOptions.DRIVER;
 public class SpannerOps {
 
     private final ConnectionFactory connectionFactory;
-    private final Connection connection;
+    //private final Connection connection;
 
 
     private static final String sampleInstance = "instance-1";
@@ -33,8 +33,10 @@ public class SpannerOps {
                 .option(DATABASE, sampleDatabase)
                 .build());
 
+    }
 
-        this.connection = Mono.from(this.connectionFactory.create()).block();
+    public Connection getConnection() {
+        return Mono.from(this.connectionFactory.create()).block();
     }
 
 }
